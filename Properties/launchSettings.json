@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Profile 1": {
+      "commandName": "Executable",
+      "executablePath": "D:\\Games\\ACTv3\\Advanced Combat Tracker.exe",
+      "workingDirectory": "D:\\Games\\ACTv3\\",
+      "nativeDebugging": true
+    }
+  }
+}

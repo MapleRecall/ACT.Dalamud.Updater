@@ -1,0 +1,83 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <AssemblyName>ACT_DaLaMa</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <OutputType>Library</OutputType>
+    <UseWindowsForms>True</UseWindowsForms>
+    <TargetFramework>net48</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>Preview</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>ACTDaLaMa</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="AutoUpdaterDotNET.Properties\**" />
+    <Compile Remove="Microsoft.CodeAnalysis\**" />
+    <Compile Remove="Newtonsoft.Json.Linq.JsonPath\**" />
+    <Compile Remove="Newtonsoft.Json.Linq\**" />
+    <Compile Remove="Newtonsoft.Json.Schema\**" />
+    <Compile Remove="Newtonsoft.Json.Serialization\**" />
+    <Compile Remove="ResourceEmbedderCompilerGenerated\**" />
+    <Compile Remove="System.Runtime.CompilerServices\**" />
+    <EmbeddedResource Remove="AutoUpdaterDotNET.Properties\**" />
+    <EmbeddedResource Remove="Microsoft.CodeAnalysis\**" />
+    <EmbeddedResource Remove="Newtonsoft.Json.Linq.JsonPath\**" />
+    <EmbeddedResource Remove="Newtonsoft.Json.Linq\**" />
+    <EmbeddedResource Remove="Newtonsoft.Json.Schema\**" />
+    <EmbeddedResource Remove="Newtonsoft.Json.Serialization\**" />
+    <EmbeddedResource Remove="ResourceEmbedderCompilerGenerated\**" />
+    <EmbeddedResource Remove="System.Runtime.CompilerServices\**" />
+    <None Remove="AutoUpdaterDotNET.Properties\**" />
+    <None Remove="Microsoft.CodeAnalysis\**" />
+    <None Remove="Newtonsoft.Json.Linq.JsonPath\**" />
+    <None Remove="Newtonsoft.Json.Linq\**" />
+    <None Remove="Newtonsoft.Json.Schema\**" />
+    <None Remove="Newtonsoft.Json.Serialization\**" />
+    <None Remove="ResourceEmbedderCompilerGenerated\**" />
+    <None Remove="System.Runtime.CompilerServices\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Advanced Combat Tracker">
+      <HintPath>..\..\Games\ACTv3\Advanced Combat Tracker.exe</HintPath>
+    </Reference>
+    <Reference Include="FFXIV_ACT_Plugin">
+      <HintPath>..\..\Games\ACTv3\plugins\FFXIV_ACT_Plugin\FFXIV_ACT_Plugin.dll</HintPath>
+    </Reference>
+    <Reference Include="FFXIV_ACT_Plugin.Common">
+      <HintPath>..\..\Games\ACTv3\plugins\FFXIV_ACT_Plugin\SDK\FFXIV_ACT_Plugin.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime">
+      <HintPath>G:\Development\NugetCache\microsoft.netframework.referenceassemblies.net48\1.0.0\build\.NETFramework\v4.8\Facades\System.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+</Project>
