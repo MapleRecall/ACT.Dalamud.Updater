@@ -256,7 +256,7 @@ public partial class DaLaMaPlugin
         return false;
     }
 
-    private string pluginVersionJsonURL = "https://maplerecall.coding.net/p/act_dalama/d/ACT_DaLaMa/git/raw/master/version.json?download=false";
+    private string pluginVersionJsonURL = "https://raw.githubusercontent.com/MapleRecall/ACT.Dalamud.Updater/main/version.json";
 
     internal class PluginVersionInfo
     {
@@ -297,7 +297,7 @@ public partial class DaLaMaPlugin
 
                 if (MessageBox.Show($"当前版本：{CurrentVersion}\r\n最新版本：{version}\r\n\r\n想试试新版么？", "新玩意儿？", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    Process.Start("https://maplerecall.coding.net/p/act_dalama/d/ACT_DaLaMa/git/raw/master/ACT_DaLaMa.dll?download=false");
+                    Process.Start("https://github.com/MapleRecall/ACT.Dalamud.Updater/releases");
                 };
             }
             else
