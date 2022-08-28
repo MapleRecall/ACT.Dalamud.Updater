@@ -1,5 +1,6 @@
 ﻿using Advanced_Combat_Tracker;
 using Dalamud.Updater;
+using Newtonsoft.Json;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -10,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,15 +23,12 @@ namespace ACTDaLaMa;
 
 public partial class DaLaMaPlugin
 {
-    public const string CurrentVersion = "114.514.1.3";
 
     private FFXIV_ACT_Plugin.FFXIV_ACT_Plugin _ffxivPlugin;
 
     private Process ffxivProcess => _ffxivPlugin?.DataRepository?.GetCurrentFFXIVProcess();
 
     private List<string> pidList = new();
-
-    private int currentPid = 0;
 
     private HashSet<int> waidList = new();
 
@@ -42,6 +41,7 @@ public partial class DaLaMaPlugin
     private DirectoryInfo assetDirectory => new DirectoryInfo(Path.Combine(rootPath, "XIVLauncher", "dalamudAssets"));
     private DirectoryInfo configDirectory => new DirectoryInfo(Path.Combine(rootPath, "XIVLauncher", "pluginConfigs"));
 
+    public string CurrentVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
     private FFXIV_ACT_Plugin.FFXIV_ACT_Plugin GetFfxivPlugin()
     {
@@ -242,8 +242,6 @@ public partial class DaLaMaPlugin
 
     private bool isInjected(Process process)
     {
-        currentPid = process.Id;
-
         try
         {
             for (int i = 0; i < process.Modules.Count; i++)
@@ -258,36 +256,59 @@ public partial class DaLaMaPlugin
         return false;
     }
 
-    private string pluginVersionURL = "https://maplerecall.coding.net/p/act_dalama/d/ACT_DaLaMa/git/raw/master/version.txt?download=false";
+    private string pluginVersionJsonURL = "https://maplerecall.coding.net/p/act_dalama/d/ACT_DaLaMa/git/raw/master/version.json?download=false";
+
+    internal class PluginVersionInfo
+    {
+        public string Version { get; set; }
+        public string[] ChangeLog { get; set; }
+    }
+
+    public string changeLog = "";
 
     private async Task CheckPluginVersionAsync()
     {
         labelPV.Text = $"插件版本：{CurrentVersion}";
 
-        using var client = new HttpClient
+        try
         {
-            Timeout = TimeSpan.FromMinutes(25),
-        };
-
-        client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
-        {
-            NoCache = true,
-        };
-
-        var version = await client.GetStringAsync(pluginVersionURL).ConfigureAwait(false);
-
-        if (string.IsNullOrEmpty(version))
-        {
-            addLog("检查插件版本失败！");
-        }
-        else if (version != CurrentVersion)
-        {
-            addLog($"最新版本：{version}");
-
-            if (MessageBox.Show($"当前版本：{CurrentVersion}\r\n最新版本：{version}\r\n\r\n想试试新版么？", "新玩意儿？",MessageBoxButtons.YesNo) == DialogResult.Yes)
+            using var client = new HttpClient
             {
-                Process.Start("https://maplerecall.coding.net/p/act_dalama/d/ACT_DaLaMa/git/raw/master/ACT_DaLaMa.dll?download=false");
+                Timeout = TimeSpan.FromMinutes(25),
             };
+
+            client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue
+            {
+                NoCache = true,
+            };
+
+            var res = await client.GetStringAsync(pluginVersionJsonURL).ConfigureAwait(false);
+            var versionJson = JsonConvert.DeserializeObject<PluginVersionInfo>(res);
+            var version = versionJson.Version;
+            changeLog = string.Join("\r\n", versionJson.ChangeLog);
+
+            if (string.IsNullOrEmpty(version))
+            {
+                throw (new Exception());
+            }
+            else if (new Version(version) > new Version(CurrentVersion))
+            {
+                addLog($"最新版本：{version}");
+
+                if (MessageBox.Show($"当前版本：{CurrentVersion}\r\n最新版本：{version}\r\n\r\n想试试新版么？", "新玩意儿？", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    Process.Start("https://maplerecall.coding.net/p/act_dalama/d/ACT_DaLaMa/git/raw/master/ACT_DaLaMa.dll?download=false");
+                };
+            }
+            else
+            {
+                addLog($"服务器版本：{version}");
+            }
+        }
+        catch (Exception)
+        {
+
+            addLog("检查插件版本失败！");
         }
     }
 }

@@ -5,4 +5,4 @@ using System.Reflection;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("MapleRecall")]
 [assembly: AssemblyProduct("Dalamud.Updater.ACT")]
-[assembly: AssemblyFileVersion("144.514.1.3")] 
+[assembly: AssemblyVersion("144.514.1.8")]

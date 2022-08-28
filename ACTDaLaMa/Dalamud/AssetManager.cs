@@ -13,7 +13,7 @@ namespace XIVLauncher.Common.Dalamud
 {
     public class AssetManager
     {
-        private const string ASSET_STORE_URL = "https://dalamudassets-1253720819.cos.ap-nanjing.myqcloud.com/asset.json";
+        private const string ASSET_STORE_URL = "https://aonyx.ffxiv.wang/Dalamud/Asset/Meta";
 
         internal class AssetInfo
         {
@@ -39,6 +39,9 @@ namespace XIVLauncher.Common.Dalamud
             {
                 NoCache = true,
             };
+
+            client.DefaultRequestHeaders.Add("User-Agent", "Wget/1.21.1 (linux-gnu)");
+            client.DefaultRequestHeaders.Add("accept-encoding", "gzip, deflate, br");
 
             using var sha1 = SHA1.Create();
 
@@ -89,7 +92,7 @@ namespace XIVLauncher.Common.Dalamud
                 {
                     Log.Verbose("[DASSET] Downloading {0} to {1}...", entry.Url, entry.FileName);
 
-                    var request = await client.GetAsync(entry.Url + "?t=" + DateTime.Now.Ticks).ConfigureAwait(true);
+                    var request = await client.GetAsync(entry.Url).ConfigureAwait(true);
                     request.EnsureSuccessStatusCode();
                     File.WriteAllBytes(filePath, await request.Content.ReadAsByteArrayAsync().ConfigureAwait(true));
 
