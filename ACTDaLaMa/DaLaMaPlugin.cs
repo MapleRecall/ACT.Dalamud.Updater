@@ -198,6 +198,7 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
 
     private void ButtonCheckForUpdate_Click(object sender, EventArgs e)
     {
+        buttonCheckForUpdate.Enabled = false;
         if (ffxivProcess != null)
         {
             if (isInjected(ffxivProcess))
@@ -242,7 +243,7 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
             ConfigurationPath = Path.Combine(xivlauncherDir, "dalamudConfig.json"),
             PluginDirectory = Path.Combine(xivlauncherDir, "installedPlugins"),
             DefaultPluginDirectory = Path.Combine(xivlauncherDir, "devPlugins"),
-            AssetDirectory = dalamudUpdater.AssetDirectory.FullName,
+            AssetDirectory = dalamudUpdater.AssetDirectory?.FullName ?? GetDefaultAssetDirectory(xivlauncherDir),
             GameVersion = gameVerStr,
             Language = "4",
             OptOutMbCollection = false,
@@ -251,6 +252,13 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
         };
 
         return startInfo;
+    }
+
+    private string GetDefaultAssetDirectory(string xivlauncherDir)
+    {
+        var assetParentDir = Path.Combine(xivlauncherDir, "dalamudAssets");
+        var version = File.ReadAllText(Path.Combine(assetParentDir, "asset.ver"));
+        return Path.Combine(assetParentDir, version);
     }
 
     private void ButtonInject_Click(object sender, EventArgs e)
@@ -337,6 +345,7 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
             // 
             // buttonCheckForUpdate
             // 
+            this.buttonCheckForUpdate.Enabled = false;
             this.buttonCheckForUpdate.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonCheckForUpdate.Location = new System.Drawing.Point(29, 36);
             this.buttonCheckForUpdate.Name = "buttonCheckForUpdate";
@@ -830,18 +839,27 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
             var xlDirectory = new DirectoryInfo(xlPath).Parent.FullName;
             var xlDataPath = Path.Combine(xlDirectory, "Roaming");
             var rootDataPath = Path.Combine(rootPath, "XIVLauncher");
-
-            if (!Directory.Exists(xlDataPath))
+            
+            var sourcetDataPath = rootDataPath;
+            var targetDataPath = xlDataPath;
+            
+            if (MessageBox.Show("同步方向？\r\n[是]：达拉姆德 >> XIV蓝鹊儿\r\n[否]：达拉姆德 << XIV蓝鹊儿", "", MessageBoxButtons.YesNo) == DialogResult.No)
             {
-                Directory.CreateDirectory(xlDataPath);
+                sourcetDataPath = xlDataPath;
+                targetDataPath = rootDataPath;
             }
 
-            if (!Directory.Exists(rootDataPath))
+            if (!Directory.Exists(targetDataPath))
             {
-                Directory.CreateDirectory(rootDataPath);
+                Directory.CreateDirectory(targetDataPath);
             }
 
-            if (JunctionPoint.Exists(xlDataPath) || JunctionPoint.Exists(rootDataPath))
+            if (!Directory.Exists(sourcetDataPath))
+            {
+                Directory.CreateDirectory(sourcetDataPath);
+            }
+
+            if (JunctionPoint.Exists(targetDataPath) || JunctionPoint.Exists(sourcetDataPath))
             {
                 MessageBox.Show("看起来你的配置文件夹已经被关联了，不用操作了~", "Wow!");
                 return;
@@ -866,24 +884,24 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
             {
                 try
                 {
-                    var xlConfig = Path.Combine(xlDataPath, "launcherConfigV3.json");
-                    var rootConfig = Path.Combine(rootDataPath, "launcherConfigV3.json");
+                    var xlConfig = Path.Combine(targetDataPath, "launcherConfigV3.json");
+                    var rootConfig = Path.Combine(sourcetDataPath, "launcherConfigV3.json");
                     File.Copy(xlConfig, rootConfig, true);
                 }
                 catch (Exception) { }
 
-                var backup = $"{xlDataPath}_backup_{DateTime.Now.Ticks}";
+                var backup = $"{targetDataPath}_backup_{DateTime.Now.Ticks}";
 
-                Directory.Move(xlDataPath, backup);
+                Directory.Move(targetDataPath, backup);
 
                 try
                 {
-                    JunctionPoint.Create(xlDataPath, rootDataPath, false);
+                    JunctionPoint.Create(targetDataPath, sourcetDataPath, false);
                     MessageBox.Show($"创建完成！请注意不要删除原来的配制文件！", "");
                 }
                 catch (Exception ex)
                 {
-                    Directory.Move(backup, xlDataPath);
+                    Directory.Move(backup, targetDataPath);
                     Log.Error(ex, "创建链接失败！");
                     addLog(ex.ToString());
 
@@ -893,21 +911,21 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
             }
             else if (result == DialogResult.Yes)
             {
-                CreateInfoFile(xlDataPath, "1_这是【启动器】的Dalamud配置目录");
-                CreateInfoFile(xlDataPath, "2_你需要把之前的配置【粘贴】进来");
-                CreateInfoFile(xlDataPath, "3_遇到重复文件直接替换就好");
-                CreateInfoFile(xlDataPath, "4_操作完成后可以把这些指引删除~");
+                CreateInfoFile(targetDataPath, "1_这是【启动器】的Dalamud配置目录");
+                CreateInfoFile(targetDataPath, "2_你需要把之前的配置【粘贴】进来");
+                CreateInfoFile(targetDataPath, "3_遇到重复文件直接替换就好");
+                CreateInfoFile(targetDataPath, "4_操作完成后可以把这些指引删除~");
 
-                CreateInfoFile(rootDataPath, "1_这是【更新器】或【ACT插件】的Dalamud配置目录");
-                CreateInfoFile(rootDataPath, "2_你需要把这儿的文件【复制】出去");
-                CreateInfoFile(rootDataPath, "3_遇到重复文件直接替换就好");
-                CreateInfoFile(rootDataPath, "4_操作完成后可以把这些指引删除~");
+                CreateInfoFile(sourcetDataPath, "1_这是【更新器】或【ACT插件】的Dalamud配置目录");
+                CreateInfoFile(sourcetDataPath, "2_你需要把这儿的文件【复制】出去");
+                CreateInfoFile(sourcetDataPath, "3_遇到重复文件直接替换就好");
+                CreateInfoFile(sourcetDataPath, "4_操作完成后可以把这些指引删除~");
 
 
                 MessageBox.Show("请根据两个文件夹内的文件指引来同步文件！", "看我看我！");
 
-                Process.Start("explorer.exe", rootDataPath);
-                Process.Start("explorer.exe", xlDataPath);
+                Process.Start("explorer.exe", sourcetDataPath);
+                Process.Start("explorer.exe", targetDataPath);
             }
         }
         else
@@ -944,18 +962,22 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
             case DalamudUpdater.DownloadState.Failed:
                 buttonInject.Enabled = MessageBox.Show("更新Dalamud失败，要直接用么？", "獭纪委", MessageBoxButtons.YesNo) == DialogResult.Yes;
                 setStatus("更新Dalamud失败");
+                buttonCheckForUpdate.Enabled = true;
                 break;
             case DalamudUpdater.DownloadState.Unknown:
                 setStatus("未知错误");
                 buttonInject.Enabled = Enabled;
+                buttonCheckForUpdate.Enabled = true;
                 break;
             case DalamudUpdater.DownloadState.NoIntegrity:
                 setStatus("卫月与游戏不兼容");
                 buttonInject.Enabled = Enabled;
+                buttonCheckForUpdate.Enabled = true;
                 break;
             case DalamudUpdater.DownloadState.Done:
                 setStatus("更新成功");
                 buttonInject.Enabled = Enabled;
+                buttonCheckForUpdate.Enabled = true;
                 break;
         }
     }

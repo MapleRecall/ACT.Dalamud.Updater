@@ -146,13 +146,23 @@ namespace XIVLauncher.Common.Dalamud
                 Log.Error(ex, "[DASSET] Could not read asset.ver");
             }
 
-            var remoteVer = JsonConvert.DeserializeObject<AssetInfo>(client.DownloadString(ASSET_STORE_URL));
 
-            Log.Verbose("[DASSET] Ver check - local:{0} remote:{1}", localVer, remoteVer.Version);
+            try
+            {
+                var remoteVer = JsonConvert.DeserializeObject<AssetInfo>(client.DownloadString(ASSET_STORE_URL));
 
-            var needsUpdate = remoteVer.Version > localVer;
+                Log.Verbose("[DASSET] Ver check - local:{0} remote:{1}", localVer, remoteVer.Version);
 
-            return (needsUpdate, remoteVer);
+                var needsUpdate = remoteVer.Version > localVer;
+
+                return (needsUpdate, remoteVer);
+            }
+            catch (Exception)
+            {
+                return (false, null);
+                throw;
+            }
+
         }
 
         private static void SetLocalAssetVer(DirectoryInfo baseDir, int version)

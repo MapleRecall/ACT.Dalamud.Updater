@@ -48,7 +48,7 @@ namespace XIVLauncher.Common.Dalamud
         public const string REMOTE_VERSION = REMOTE_BASE + "Dalamud/Release/VersionInfo?track=release";
         public const string REMOTE_DOTNET = REMOTE_BASE + "Dalamud/Release/Runtime/DotNet/{0}";
         public const string REMOTE_DESKTOP = REMOTE_BASE + "Dalamud/Release/Runtime/WindowsDesktop/{0}";
-        private readonly TimeSpan defaultTimeout = TimeSpan.FromMinutes(25);
+        private readonly TimeSpan defaultTimeout = TimeSpan.FromSeconds(120);
 
         private DownloadState _state;
         public DownloadState State
@@ -135,7 +135,7 @@ namespace XIVLauncher.Common.Dalamud
             Log.Information("[DUPDATE] Starting...");
             Task.Run(async () =>
             {
-                const int MAX_TRIES = 3;
+                const int MAX_TRIES = 1;
 
                 for (var tries = 0; tries < MAX_TRIES; tries++)
                 {
@@ -164,7 +164,7 @@ namespace XIVLauncher.Common.Dalamud
         {
             using var client = new HttpClient
             {
-                Timeout = this.defaultTimeout,
+                Timeout = TimeSpan.FromSeconds(15),
             };
 
             client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue

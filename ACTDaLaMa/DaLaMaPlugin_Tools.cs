@@ -218,7 +218,10 @@ public partial class DaLaMaPlugin
                 }
             }
 
-            var dalamudStartInfo = GeneratingDalamudStartInfo(process, Directory.GetParent(dalamudUpdater.Runner.FullName).FullName);
+            var runner = dalamudUpdater.Runner ??
+                new FileInfo(Path.Combine(addonDirectory.FullName, "Hooks", getVersion().ToString(), "Dalamud.Injector.exe"));
+
+            var dalamudStartInfo = GeneratingDalamudStartInfo(process, Directory.GetParent(runner.FullName).FullName);
             var environment = new Dictionary<string, string>();
             // No use cuz we're injecting instead of launching, the Dalamud.Boot.dll is reading environment variables from ffxiv_dx11.exe
             /*
@@ -226,7 +229,7 @@ public partial class DaLaMaPlugin
             if (string.IsNullOrWhiteSpace(prevDalamudRuntime))
                 environment.Add("DALAMUD_RUNTIME", runtimeDirectory.FullName);
             */
-            WindowsDalamudRunner.Inject(dalamudUpdater.Runner, process.Id, environment, DalamudLoadMethod.DllInject, dalamudStartInfo);
+            WindowsDalamudRunner.Inject(runner, process.Id, environment, DalamudLoadMethod.DllInject, dalamudStartInfo);
             addLog($"装载完成：{pid}");
             SendNotification($"帮你装载了，可能会卡一会儿，不用谢。", $"PID {pid}");
 
@@ -268,6 +271,7 @@ public partial class DaLaMaPlugin
 
     private async Task CheckPluginVersionAsync()
     {
+        buttonCheckForUpdate.Enabled = false;
         labelPV.Text = $"插件版本：{CurrentVersion}";
 
         try
