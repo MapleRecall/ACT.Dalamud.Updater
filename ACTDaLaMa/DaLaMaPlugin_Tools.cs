@@ -38,8 +38,9 @@ public partial class DaLaMaPlugin
 
     private DirectoryInfo addonDirectory => new DirectoryInfo(Path.Combine(rootPath, "addon"));
     private DirectoryInfo runtimeDirectory => new DirectoryInfo(Path.Combine(rootPath, "runtime"));
+    private DirectoryInfo xivlauncherDirectory => new DirectoryInfo(Path.Combine(rootPath, "XIVLauncher"));
     private DirectoryInfo assetDirectory => new DirectoryInfo(Path.Combine(rootPath, "XIVLauncher", "dalamudAssets"));
-    private DirectoryInfo configDirectory => new DirectoryInfo(Path.Combine(rootPath, "XIVLauncher", "pluginConfigs"));
+    private DirectoryInfo configDirectory => new DirectoryInfo(Path.Combine(rootPath, "XIVLauncher"));
 
     public string CurrentVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
@@ -108,23 +109,37 @@ public partial class DaLaMaPlugin
         dalamudUpdater.OnUpdateEvent += DalamudUpdater_OnUpdateEvent;
     }
 
-    private Version getVersion()
+    private string getVersion()
     {
         var rgx = new Regex(@"^\d+\.\d+\.\d+\.\d+$");
+        var stgRgx = new Regex(@"^[\da-zA-Z]{7}$");
         var di = new DirectoryInfo(Path.Combine(rootPath, "addon", "Hooks"));
         var version = new Version("0.0.0.0");
         if (!di.Exists)
-            return version;
+            return version.ToString();
         var dirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly).Where(dir => rgx.IsMatch(dir.Name)).ToArray();
+        bool releaseVersionExists = false;
+
         foreach (var dir in dirs)
         {
             var newVersion = new Version(dir.Name);
             if (newVersion > version)
             {
+                releaseVersionExists = true;
                 version = newVersion;
             }
         }
-        return version;
+
+        if (!releaseVersionExists)
+        {
+            var stgDirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly).Where(dir => stgRgx.IsMatch(dir.Name)).ToArray();
+            if (stgDirs.Length > 0)
+            {
+                return stgDirs[0].Name;
+            }
+        }
+
+        return version.ToString();
     }
 
     private void InitializePIDCheck()
@@ -219,7 +234,7 @@ public partial class DaLaMaPlugin
             }
 
             var runner = dalamudUpdater.Runner ??
-                new FileInfo(Path.Combine(addonDirectory.FullName, "Hooks", getVersion().ToString(), "Dalamud.Injector.exe"));
+                new FileInfo(Path.Combine(addonDirectory.FullName, "Hooks", getVersion(), "Dalamud.Injector.exe"));
 
             var dalamudStartInfo = GeneratingDalamudStartInfo(process, Directory.GetParent(runner.FullName).FullName);
             var environment = new Dictionary<string, string>();

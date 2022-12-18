@@ -35,8 +35,6 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
 
     private LinkLabel linkLabel1;
 
-    private CheckBox checkBoxAcce;
-
     private LinkLabel linkLabel2;
 
     private CheckBox checkBoxAutoInject;
@@ -130,11 +128,6 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
         if (GetAppSettings("AutoInject", "false") == "true")
         {
             checkBoxAutoInject.Checked = true;
-        }
-
-        if (GetAppSettings("Accelerate", "false") == "true")
-        {
-            checkBoxAcce.Checked = true;
         }
 
         if (GetAppSettings("AutoCheckXL", "true") == "true")
@@ -233,8 +226,7 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
     private DalamudStartInfo GeneratingDalamudStartInfo(Process process, string dalamudPath)
     {
         var ffxivDir = Path.GetDirectoryName(process.MainModule.FileName);
-        var appDataDir = Path.Combine(rootPath);
-        var xivlauncherDir = Path.Combine(appDataDir, "XIVLauncher");
+        var xivlauncherDir = xivlauncherDirectory.FullName;
 
         var gameVerStr = File.ReadAllText(Path.Combine(ffxivDir, "ffxivgame.ver"));
 
@@ -243,11 +235,11 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
             ConfigurationPath = Path.Combine(xivlauncherDir, "dalamudConfig.json"),
             PluginDirectory = Path.Combine(xivlauncherDir, "installedPlugins"),
             DefaultPluginDirectory = Path.Combine(xivlauncherDir, "devPlugins"),
+            RuntimeDirectory = runtimeDirectory.FullName,
             AssetDirectory = dalamudUpdater.AssetDirectory?.FullName ?? GetDefaultAssetDirectory(xivlauncherDir),
             GameVersion = gameVerStr,
             Language = "4",
             OptOutMbCollection = false,
-            GlobalAccelerate = this.checkBoxAcce.Checked,
             WorkingDirectory = dalamudPath
         };
 
@@ -278,11 +270,6 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
         AddOrUpdateAppSettings("AutoInject", checkBoxAutoInject.Checked ? "true" : "false");
     }
 
-    private void checkBoxAcce_CheckedChanged(object sender, EventArgs e)
-    {
-        AddOrUpdateAppSettings("Accelerate", checkBoxAcce.Checked ? "true" : "false");
-    }
-
     protected override void Dispose(bool disposing)
     {
         if (disposing && components != null)
@@ -299,7 +286,6 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
             this.labelVersion = new System.Windows.Forms.Label();
             this.buttonInject = new System.Windows.Forms.Button();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
-            this.checkBoxAcce = new System.Windows.Forms.CheckBox();
             this.linkLabel2 = new System.Windows.Forms.LinkLabel();
             this.checkBoxAutoInject = new System.Windows.Forms.CheckBox();
             this.DalamudUpdaterIcon = new System.Windows.Forms.NotifyIcon(this.components);
@@ -388,17 +374,6 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
             this.linkLabel1.TabStop = true;
             this.linkLabel1.Text = "加入QQ频道";
             this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
-            // 
-            // checkBoxAcce
-            // 
-            this.checkBoxAcce.AutoSize = true;
-            this.checkBoxAcce.Location = new System.Drawing.Point(400, 11);
-            this.checkBoxAcce.Name = "checkBoxAcce";
-            this.checkBoxAcce.Size = new System.Drawing.Size(78, 19);
-            this.checkBoxAcce.TabIndex = 4;
-            this.checkBoxAcce.Text = "国际加速";
-            this.checkBoxAcce.UseVisualStyleBackColor = true;
-            this.checkBoxAcce.CheckedChanged += new System.EventHandler(this.checkBoxAcce_CheckedChanged);
             // 
             // linkLabel2
             // 
@@ -750,7 +725,6 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
             this.Controls.Add(this.progressBar3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.labelVer);
-            this.Controls.Add(this.checkBoxAcce);
             this.Controls.Add(this.linkLabel2);
             this.Controls.Add(this.labelVersion);
             this.Controls.Add(this.buttonCheckForUpdate);

@@ -14,9 +14,10 @@ public static class WindowsDalamudRunner
 
         var launchArguments = new List<string>
         {
-            "inject",
+            "inject -v",
             $"{gamePid}",
             //$"--all --warn",
+            //$"--game=\"{gamePath}\"",
             $"--dalamud-working-directory=\"{startInfo.WorkingDirectory}\"",
             $"--dalamud-configuration-path=\"{startInfo.ConfigurationPath}\"",
             $"--dalamud-plugin-directory=\"{startInfo.PluginDirectory}\"",
