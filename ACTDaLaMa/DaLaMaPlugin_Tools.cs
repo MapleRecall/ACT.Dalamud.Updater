@@ -36,11 +36,11 @@ public partial class DaLaMaPlugin
 
     private DalamudLoadingOverlay dalamudLoadingOverlay;
 
-    private DirectoryInfo addonDirectory => new DirectoryInfo(Path.Combine(rootPath, "addon"));
-    private DirectoryInfo runtimeDirectory => new DirectoryInfo(Path.Combine(rootPath, "runtime"));
-    private DirectoryInfo xivlauncherDirectory => new DirectoryInfo(Path.Combine(rootPath, "XIVLauncher"));
-    private DirectoryInfo assetDirectory => new DirectoryInfo(Path.Combine(rootPath, "XIVLauncher", "dalamudAssets"));
-    private DirectoryInfo configDirectory => new DirectoryInfo(Path.Combine(rootPath, "XIVLauncher"));
+    private DirectoryInfo xivlauncherDirectory => new(Path.Combine(rootPath, "XIVLauncher"));
+    private DirectoryInfo addonDirectory => new(Path.Combine(xivlauncherDirectory.FullName, "addon"));
+    private DirectoryInfo runtimeDirectory => new(Path.Combine(xivlauncherDirectory.FullName, "runtime"));
+    private DirectoryInfo assetDirectory => new(Path.Combine(xivlauncherDirectory.FullName, "dalamudAssets"));
+    private DirectoryInfo configDirectory => xivlauncherDirectory;
 
     public string CurrentVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
@@ -113,11 +113,11 @@ public partial class DaLaMaPlugin
     {
         var rgx = new Regex(@"^\d+\.\d+\.\d+\.\d+$");
         var stgRgx = new Regex(@"^[\da-zA-Z]{7}$");
-        var di = new DirectoryInfo(Path.Combine(rootPath, "addon", "Hooks"));
+        var hookDirectory = new DirectoryInfo((Path.Combine(addonDirectory.FullName, "Hooks")));
         var version = new Version("0.0.0.0");
-        if (!di.Exists)
+        if (!hookDirectory.Exists)
             return version.ToString();
-        var dirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly).Where(dir => rgx.IsMatch(dir.Name)).ToArray();
+        var dirs = hookDirectory.GetDirectories("*", SearchOption.TopDirectoryOnly).Where(dir => rgx.IsMatch(dir.Name)).ToArray();
         bool releaseVersionExists = false;
 
         foreach (var dir in dirs)
@@ -132,7 +132,7 @@ public partial class DaLaMaPlugin
 
         if (!releaseVersionExists)
         {
-            var stgDirs = di.GetDirectories("*", SearchOption.TopDirectoryOnly).Where(dir => stgRgx.IsMatch(dir.Name)).ToArray();
+            var stgDirs = hookDirectory.GetDirectories("*", SearchOption.TopDirectoryOnly).Where(dir => stgRgx.IsMatch(dir.Name)).ToArray();
             if (stgDirs.Length > 0)
             {
                 return stgDirs[0].Name;

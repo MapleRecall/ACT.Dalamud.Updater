@@ -75,7 +75,6 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
     private CheckBox checkBoxXL;
     private ToolTip toolTip1;
     private string rootPath = Path.Combine(ActGlobals.oFormActMain.AppDataFolder.FullName, "Dalamud");
-    private string backupPath => Path.Combine(rootPath, "backup");
 
     public static string GetAppSettings(string key, string def = null)
     {
@@ -976,15 +975,43 @@ public partial class DaLaMaPlugin : UserControl, IActPluginV1
         addLog($"打扫场地...");
         try
         {
+            var shitInjector = Path.Combine(rootPath, "Dalamud.Injector.exe");
+            if (File.Exists(shitInjector))
+            {
+                File.Delete(shitInjector);
+            }
+
+            var shitDalamud = Path.Combine(rootPath, "6.3.0.9");
+            if (Directory.Exists(shitDalamud))
+            {
+                Directory.Delete(shitDalamud, true);
+            }
+
+            var shitUIRes = Path.Combine(assetDirectory.FullName, "UIRes");
+            if (Directory.Exists(shitUIRes))
+            {
+                Directory.Delete(shitUIRes, true);
+            }
+
+            var shitAddon = Path.Combine(rootPath, "addon");
+            if (Directory.Exists(shitAddon))
+            {
+                Directory.Delete(shitAddon, true);
+            }
+
+            var shitRuntime = Path.Combine(rootPath, "runtime");
+            if (Directory.Exists(shitRuntime))
+            {
+                Directory.Delete(shitRuntime, true);
+            }
+        }
+        catch (Exception){}
+        try
+        {
             if (!Directory.Exists(rootPath))
             {
                 addLog("未找到当前路径，尝试创一下...");
                 Directory.CreateDirectory(rootPath);
-            }
-
-            if (!Directory.Exists(backupPath))
-            {
-                Directory.CreateDirectory(backupPath);
             }
 
             AddOrUpdateAppSettings("RootPath", rootPath);
